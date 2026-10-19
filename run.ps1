@@ -16,7 +16,7 @@ if (-not (Test-Path $py)) {
     Write-Host "Creating Python environment in $Venv"
     python -m venv $Venv
     & $py -m pip install --upgrade pip
-    & $py -m pip install torch --index-url https://download.pytorch.org/whl/cu124
+    & $py -m pip install torch torchvision --index-url https://download.pytorch.org/whl/cu124
 }
 & $py -m pip install -q -r (Join-Path $here "requirements.txt")
 
@@ -27,7 +27,7 @@ $env:HF_HUB_DISABLE_SYMLINKS_WARNING = "1"
 if ($Ingest -or -not (Test-Path (Join-Path $env:DATA_DIR "vectors.npy"))) {
     Write-Host "Building the knowledge pack ($MaxDocs articles of Simple English Wikipedia)..."
     $env:KNOWLEDGE_MAX_DOCS = "$MaxDocs"
-    & $py (Join-Path $here "..\app\ingest.py")
+    & $py (Join-Path $here "ingest.py")
 }
 
 $ip = (Get-NetIPAddress -AddressFamily IPv4 -ErrorAction SilentlyContinue |

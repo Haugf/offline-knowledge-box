@@ -107,6 +107,30 @@ button, input, select { font: inherit; color: inherit; }
 .article .src span { font-family: var(--mono); font-size: 11px; color: var(--muted); flex: 1; }
 .article .src a { font-weight: 700; font-size: 14px; text-decoration: none; }
 
+/* Survey */
+.survey { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+.viewfinder { position: relative; aspect-ratio: 4 / 3; background: var(--paper-hi); border: 1px solid var(--rule); display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.viewfinder img { width: 100%; height: 100%; object-fit: cover; }
+.vf-empty { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 24px; text-align: center; font-family: var(--serif); font-style: italic; color: var(--muted); font-size: 15px; }
+.corner { position: absolute; width: 22px; height: 22px; border: 0 solid var(--forest); }
+.corner.tl { top: 10px; left: 10px; border-top-width: 3px; border-left-width: 3px; }
+.corner.tr { top: 10px; right: 10px; border-top-width: 3px; border-right-width: 3px; }
+.corner.bl { bottom: 10px; left: 10px; border-bottom-width: 3px; border-left-width: 3px; }
+.corner.br { bottom: 10px; right: 10px; border-bottom-width: 3px; border-right-width: 3px; }
+.shoot { display: flex; gap: 10px; }
+.btn { flex: 1; min-height: 48px; display: flex; align-items: center; justify-content: center; gap: 8px; border: 1.5px solid var(--forest); background: var(--paper-hi); color: var(--forest-ink); font-weight: 700; font-size: 15px; cursor: pointer; }
+.btn.primary { background: var(--forest); color: #fff; flex: 1.4; }
+.btn:focus-within { box-shadow: 0 0 0 3px var(--mint-deep); }
+.guess { background: var(--mint); border: 1px solid var(--mint-deep); padding: 14px 16px; display: flex; flex-direction: column; gap: 4px; }
+.guess .lbl { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; color: #2F4A35; }
+.guess .nm { font-size: 24px; font-weight: 800; line-height: 1.15; }
+.guess .sci { font-family: var(--serif); font-style: italic; font-size: 17px; color: var(--forest); }
+.guess .ft { font-size: 14px; line-height: 1.45; color: #2F4A35; margin-top: 4px; }
+.matches { display: flex; flex-direction: column; }
+.matches a { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; padding: 11px 0; border-bottom: 1px dashed var(--dash); text-decoration: none; }
+.matches a .t { font-family: var(--serif); font-weight: 600; font-size: 18px; color: var(--ink); }
+.matches a .m { font-family: var(--mono); font-size: 10px; color: var(--water-ink); flex-shrink: 0; }
+
 .sheet-bg { position: fixed; inset: 0; background: rgba(17,17,17,0.45); display: none; align-items: flex-end; justify-content: center; z-index: 10; }
 .sheet-bg.on { display: flex; }
 .sheet { width: 100%; max-width: 480px; background: var(--paper); border-top: 6px solid var(--band); padding-bottom: 28px; }
@@ -157,11 +181,11 @@ button, input, select { font: inherit; color: inherit; }
         <span class="txt"><span class="name">Reference</span><span class="desc">Search the offline Wikipedia pack</span></span>
         <span class="arrow">→</span>
       </a>
-      <div class="soon">
+      <a href="#survey">
         <span class="sym" style="background:#B5D6A8"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1F3E27" stroke-width="1.8" aria-hidden="true"><path d="M12 21V11"/><path d="M12 11C12 6 8 4 5 4c0 4 2 7 7 7z"/><path d="M12 13c0-4 3-6 7-6 0 4-3 6-7 6z"/></svg></span>
         <span class="txt"><span class="name">Survey</span><span class="desc">Identify plants &amp; animals by camera</span></span>
-        <span class="tag">V2</span>
-      </div>
+        <span class="arrow">→</span>
+      </a>
       <div class="soon">
         <span class="sym" style="background:#EADFCF;border-color:#A0714F"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7A5236" stroke-width="1.8" aria-hidden="true"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/></svg></span>
         <span class="txt"><span class="name">Quadrangle</span><span class="desc">Offline maps &amp; directions</span></span>
@@ -204,6 +228,35 @@ button, input, select { font: inherit; color: inherit; }
       <input id="noteQ" type="text" placeholder="Ask anything — works offline" autocomplete="off">
       <button class="send" id="sendBtn" aria-label="Send"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
     </form>
+  </section>
+
+  <!-- SURVEY -->
+  <section class="screen" id="survey" aria-label="Survey">
+    <header class="band">
+      <div class="band-row">
+        <a href="#home" class="back" aria-label="Back to home"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></a>
+        <div style="flex:1;display:flex;flex-direction:column;gap:2px">
+          <h2>Survey</h2>
+          <span class="kicker">SMOLVLM2 2.2B · IDENTIFY BY PHOTO</span>
+        </div>
+      </div>
+    </header>
+    <div class="survey">
+      <div class="viewfinder" id="viewfinder">
+        <img id="shot" alt="Your photo" hidden>
+        <div class="vf-empty" id="vfEmpty">
+          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#2F5D3A" stroke-width="1.4" aria-hidden="true"><path d="M12 21V11"/><path d="M12 11C12 6 8 4 5 4c0 4 2 7 7 7z"/><path d="M12 13c0-4 3-6 7-6 0 4-3 6-7 6z"/></svg>
+          <span>Fill the frame with one leaf, flower, bug or animal.</span>
+        </div>
+        <span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>
+      </div>
+      <div class="shoot">
+        <label class="btn primary"><input type="file" accept="image/*" capture="environment" id="camIn" class="sr">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>Take a photo</label>
+        <label class="btn"><input type="file" accept="image/*" id="fileIn" class="sr">Choose photo</label>
+      </div>
+      <div id="surveyOut" aria-live="polite"></div>
+    </div>
   </section>
 
   <!-- REFERENCE -->
@@ -415,6 +468,63 @@ async function openArticle(title) {
     <div class="src"><span>SOURCE · WIKIPEDIA (OFFLINE) · CC BY-SA 4.0</span>
     <a href="#notes" id="askAbout">Ask about this →</a></div>`;
   $('#askAbout').addEventListener('click', () => setTimeout(() => ask(`Tell me about ${a.title}.`), 0));
+}
+
+// ---- Survey
+function downscale(file, max = 1024) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const k = Math.min(1, max / Math.max(img.width, img.height));
+      const c = document.createElement('canvas');
+      c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(img.src);
+      resolve(c.toDataURL('image/jpeg', 0.85));
+    };
+    img.onerror = () => reject(new Error('Could not read that photo'));
+    img.src = URL.createObjectURL(file);
+  });
+}
+['#camIn', '#fileIn'].forEach((id) => $(id).addEventListener('change', (e) => {
+  const f = e.target.files[0];
+  e.target.value = '';
+  if (f) runSurvey(f);
+}));
+async function runSurvey(file) {
+  if (busy) return;
+  busy = true;
+  const out = $('#surveyOut');
+  try {
+    const dataUrl = await downscale(file);
+    $('#shot').src = dataUrl; $('#shot').hidden = false; $('#vfEmpty').hidden = true;
+    out.innerHTML = `<div class="note"><div class="head"><span>SURVEYING…</span></div>
+      <div class="scalebar busy" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+      <div class="meta">The first survey loads the vision model, about 20 seconds.</div></div>`;
+    const res = await fetch('/api/survey', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ image: dataUrl }),
+    });
+    if (!res.ok) throw new Error((await res.json().catch(() => ({}))).detail || res.statusText);
+    const r = await res.json();
+    out.innerHTML = `
+      <div class="guess"><span class="lbl">BEST GUESS</span>
+        <span class="nm">${esc(r.name)}</span>
+        ${r.scientific ? `<span class="sci">${esc(r.scientific)}</span>` : ''}
+        ${r.features ? `<span class="ft">${esc(r.features)}</span>` : ''}
+      </div>
+      <div class="warnbox" style="margin-top:12px"><strong>An educated guess, not a fact.</strong> Never eat or handle anything because an app named it.</div>
+      ${r.matches.length ? `<div class="rule" style="margin:18px 0 0">IN THE LIBRARY</div><div class="matches">${r.matches.map((m) =>
+        `<a href="${artHref(m.title)}"><span class="t">${esc(m.title)}</span><span class="m">${m.exact ? 'EXACT MATCH' : 'RELATED'} →</span></a>`).join('')}</div>` : ''}
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;gap:10px">
+        <span class="meta mono" style="font-size:11px;color:var(--muted)">smolvlm2 · ${r.seconds} s</span>
+        <a href="#notes" id="surveyAsk" style="font-weight:700;font-size:14px;text-decoration:none">Ask about this →</a>
+      </div>`;
+    $('#surveyAsk').addEventListener('click', () => setTimeout(() => ask(`I found a ${r.name}${r.scientific ? ` (${r.scientific})` : ''}. What should I know about it, and is it dangerous?`), 0));
+  } catch (err) {
+    out.innerHTML = `<div class="warnbox">Survey failed: ${esc(String(err.message || err))}</div>`;
+  } finally {
+    busy = false;
+  }
 }
 
 // ---- About sheet

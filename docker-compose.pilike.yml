@@ -1,9 +1,0 @@
-# "Pi-like" tier — caps CPU/RAM to roughly a Raspberry Pi 4/5 (4 cores, 4 GB).
-# This approximates resource limits only, not Pi CPU speed. Label results "Pi-like", not "Pi".
-services:
-  ollama:
-    cpus: 4
-    mem_limit: 4g
-  app:
-    cpus: 1
-    mem_limit: 1g

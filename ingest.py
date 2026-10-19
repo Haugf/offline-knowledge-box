@@ -1,7 +1,7 @@
 """Build the offline knowledge pack from a Hugging Face dataset.
 
-Run once while online:
-    docker compose run --rm app python ingest.py
+Run once while online (run.ps1 does this for you on first start):
+    .\\run.ps1 -Ingest
 
 Streams articles from the dataset, splits them into chunks, embeds each chunk
 with a Hugging Face sentence-transformers model, and saves everything to
