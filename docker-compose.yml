@@ -1,0 +1,33 @@
+# Offline Knowledge Box — base stack (runs on Mac, Windows/WSL2, Pi; amd64 + arm64)
+# GPU tier:      docker compose -f docker-compose.yml -f docker-compose.gpu.yml up -d
+# Pi-like tier:  docker compose -f docker-compose.yml -f docker-compose.pilike.yml up -d
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama:/root/.ollama
+    environment:
+      - OLLAMA_KEEP_ALIVE=30m
+
+  app:
+    build: ./app
+    restart: unless-stopped
+    depends_on:
+      - ollama
+    ports:
+      - "8080:8080"
+    env_file: .env
+    environment:
+      - OLLAMA_URL=http://ollama:11434
+      - DATA_DIR=/data
+      - HF_HOME=/data/hf-cache
+    volumes:
+      - knowledge:/data
+
+volumes:
+  ollama:
+  knowledge:

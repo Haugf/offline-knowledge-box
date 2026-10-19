@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#111111">
+<title>Field Kit</title>
+<!-- Fonts are a nice-to-have: offline, the system fallbacks below take over. -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&family=Source+Serif+4:ital,wght@0,400;0,600;1,400;1,600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root {
+  --paper: #F4F1E6; --paper-hi: #FBFAF4; --paper-lo: #EFEBDD;
+  --mint: #D6E9CF; --mint-deep: #B5D6A8; --forest: #2F5D3A; --forest-ink: #1F3E27;
+  --contour: #A0714F; --contour-ink: #5B4A3A; --rule: #D8CBB8; --dash: #C9B49E;
+  --water: #3E7CA8; --water-ink: #2C5F85; --water-bg: #E3EDF4;
+  --red: #B5442E; --red-ink: #6E2416; --red-bg: #F6E3DD;
+  --ink: #1E1E1E; --muted: #55524A; --band: #111111; --band-muted: #BDBDB2;
+  --sans: 'Public Sans', system-ui, 'Segoe UI', sans-serif;
+  --serif: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+  --mono: 'IBM Plex Mono', ui-monospace, Consolas, monospace;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body { background: #2A2A27; color: var(--ink); font-family: var(--sans); }
+a { color: var(--water-ink); }
+a:hover { color: #1F4766; }
+button, input, select { font: inherit; color: inherit; }
+.app { max-width: 480px; min-height: 100%; margin: 0 auto; background: var(--paper); display: flex; flex-direction: column; }
+.screen { display: none; flex: 1; flex-direction: column; min-height: 100vh; }
+.screen.on { display: flex; }
+
+/* NPS-style band header */
+.band { background: var(--band); color: #fff; padding: 20px 16px 16px; display: flex; flex-direction: column; gap: 6px; position: sticky; top: 0; z-index: 2; }
+.band-row { display: flex; align-items: center; gap: 12px; }
+.band h1 { margin: 0; font-size: 34px; font-weight: 800; letter-spacing: -0.01em; }
+.band h2 { margin: 0; font-size: 24px; font-weight: 800; }
+.band .kicker { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--band-muted); }
+.band .sub { font-family: var(--serif); font-style: italic; font-size: 15px; color: #D9D9CF; }
+.back { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: #fff; margin-left: -8px; flex-shrink: 0; }
+.mono { font-family: var(--mono); }
+
+.status { margin: 16px 16px 0; background: var(--mint); border: 1px solid var(--mint-deep); padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; }
+.status strong { font-size: 15px; color: var(--forest-ink); display: flex; align-items: center; gap: 8px; }
+.dot { width: 9px; height: 9px; border-radius: 50%; background: var(--forest); flex-shrink: 0; }
+.dot.warn { background: var(--red); }
+.status .stats { display: flex; flex-wrap: wrap; gap: 4px 14px; font-family: var(--mono); font-size: 11px; color: #2F4A35; }
+
+.field { margin: 14px 16px 0; display: flex; flex-direction: column; gap: 6px; }
+.field label { font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--forest); }
+.searchbox { display: flex; align-items: center; gap: 10px; height: 48px; padding: 0 14px; background: var(--paper-hi); border: 1.5px solid var(--forest); }
+.searchbox input { flex: 1; min-width: 0; border: 0; background: transparent; font-size: 16px; outline: none; }
+.searchbox:focus-within { box-shadow: 0 0 0 3px var(--mint-deep); }
+
+.rule { margin: 20px 16px 6px; display: flex; align-items: center; gap: 10px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; color: var(--contour-ink); }
+.rule::after { content: ""; flex: 1; height: 1px; background: var(--contour); opacity: 0.5; }
+
+.legend { margin: 0 16px; display: flex; flex-direction: column; }
+.legend a, .legend .soon { display: flex; align-items: center; gap: 14px; padding: 11px 0; border-bottom: 1px dashed var(--dash); color: var(--ink); text-decoration: none; min-height: 62px; }
+.legend > :last-child { border-bottom: 0; }
+.legend a:hover .name { color: var(--forest); }
+.legend .soon { opacity: 0.55; }
+.sym { width: 40px; height: 40px; flex-shrink: 0; border: 1.5px solid var(--forest); background: var(--mint); display: flex; align-items: center; justify-content: center; }
+.legend .txt { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.legend .name { font-size: 16px; font-weight: 700; }
+.legend .desc { font-size: 13px; color: var(--muted); }
+.legend .arrow { font-family: var(--mono); font-size: 13px; color: var(--contour); }
+.tag { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; border: 1px solid var(--contour); color: var(--contour-ink); padding: 2px 6px; }
+
+.foot { margin-top: auto; padding: 24px 20px 28px; display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+.scalebar { display: flex; border: 1px solid var(--ink); width: 120px; height: 7px; }
+.scalebar span { flex: 1; }
+.scalebar span:nth-child(odd) { background: var(--ink); }
+.scalebar.busy span { animation: march 1s steps(1) infinite; }
+.scalebar.busy span:nth-child(even) { animation-delay: .5s; }
+@keyframes march { 0% { background: var(--ink); } 50% { background: transparent; } }
+.link-btn { background: transparent; border: 0; padding: 10px 0; cursor: pointer; font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; color: var(--muted); text-decoration: underline; text-underline-offset: 3px; min-height: 44px; }
+
+/* Field Notes */
+.thread { flex: 1; padding: 18px 16px; display: flex; flex-direction: column; gap: 16px; }
+.empty { font-family: var(--serif); font-style: italic; color: var(--muted); font-size: 16px; line-height: 1.5; }
+.q { align-self: flex-end; max-width: 82%; background: var(--forest); color: #fff; padding: 12px 14px; font-size: 15px; line-height: 1.4; white-space: pre-wrap; }
+.note { background: var(--paper-hi); border: 1px solid var(--rule); padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.note .head { font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; color: var(--contour-ink); display: flex; justify-content: space-between; gap: 8px; }
+.note .body { font-size: 15px; line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; }
+.note .body sup { font-family: var(--mono); font-size: 10px; color: var(--water-ink); }
+.note .meta { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.warnbox { background: var(--red-bg); border: 1.5px solid var(--red); padding: 10px 12px; font-size: 14px; line-height: 1.4; color: var(--red-ink); }
+.sources { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.sources .label { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.chip { font-size: 13px; padding: 5px 10px; border: 1px solid var(--water); background: var(--water-bg); text-decoration: none; }
+.composer { position: sticky; bottom: 0; padding: 12px 16px calc(16px + env(safe-area-inset-bottom)); border-top: 1px solid var(--rule); background: var(--paper-lo); display: flex; gap: 10px; align-items: center; }
+.composer input { flex: 1; min-width: 0; height: 46px; padding: 0 14px; border: 1.5px solid var(--forest); background: var(--paper-hi); font-size: 16px; outline: none; }
+.composer input:focus { box-shadow: 0 0 0 3px var(--mint-deep); }
+.send { width: 46px; height: 46px; background: var(--forest); border: 0; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+.send:disabled { opacity: 0.5; cursor: wait; }
+.model-pick { background: #1E1E1E; color: var(--band-muted); border: 1px solid #5A5A55; font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em; height: 34px; padding: 0 6px; max-width: 150px; }
+
+/* Reference */
+.results { margin: 8px 16px 24px; display: flex; flex-direction: column; }
+.result { display: block; padding: 12px 0; border-bottom: 1px dashed var(--dash); text-decoration: none; color: var(--ink); }
+.result .t { font-family: var(--serif); font-weight: 600; font-size: 19px; }
+.result .s { font-size: 13px; color: var(--muted); line-height: 1.45; margin-top: 2px; }
+.article { padding: 18px 20px 28px; display: flex; flex-direction: column; gap: 14px; }
+.article h3 { margin: 0; font-family: var(--serif); font-weight: 600; font-size: 30px; line-height: 1.1; }
+.article p { margin: 0; font-family: var(--serif); font-size: 17px; line-height: 1.6; }
+.article .src { margin-top: 8px; padding-top: 12px; border-top: 1px dashed var(--dash); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.article .src span { font-family: var(--mono); font-size: 11px; color: var(--muted); flex: 1; }
+.article .src a { font-weight: 700; font-size: 14px; text-decoration: none; }
+
+.sheet-bg { position: fixed; inset: 0; background: rgba(17,17,17,0.45); display: none; align-items: flex-end; justify-content: center; z-index: 10; }
+.sheet-bg.on { display: flex; }
+.sheet { width: 100%; max-width: 480px; background: var(--paper); border-top: 6px solid var(--band); padding-bottom: 28px; }
+.sheet .band { position: static; flex-direction: row; justify-content: space-between; align-items: center; padding: 12px 20px; }
+.sheet ol { margin: 0; padding: 16px 20px 4px 44px; display: flex; flex-direction: column; gap: 12px; font-size: 14px; line-height: 1.45; }
+.sheet ol li::marker { font-family: var(--mono); font-size: 11px; color: var(--forest); }
+.sheet ol li:last-child::marker { color: var(--red); }
+.sheet .close { width: 44px; height: 44px; background: transparent; border: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- HOME -->
+  <section class="screen" id="home" aria-label="Home">
+    <header class="band">
+      <div class="band-row" style="justify-content: space-between;">
+        <span class="kicker">UNIT 01 · OFFLINE</span>
+        <span class="kicker" id="hw">—</span>
+      </div>
+      <h1>Field Kit</h1>
+      <div class="sub">An offline reference for the outdoors</div>
+    </header>
+
+    <div class="status" role="status">
+      <strong><span class="dot" id="statusDot"></span><span id="statusText">Checking the box…</span></strong>
+      <div class="stats"><span id="statLib">LIBRARY —</span><span id="statModel">MODEL —</span></div>
+    </div>
+
+    <form class="field" id="homeAsk">
+      <label for="homeQ">Ask or search</label>
+      <div class="searchbox">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2F5D3A" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+        <input id="homeQ" type="text" placeholder="How do I purify stream water?" autocomplete="off">
+      </div>
+    </form>
+
+    <div class="rule">LEGEND</div>
+    <nav class="legend">
+      <a href="#notes">
+        <span class="sym"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2F5D3A" stroke-width="1.8" aria-hidden="true"><path d="M5 4h14v12H9l-4 4z"/><path d="M9 9h6M9 12h4"/></svg></span>
+        <span class="txt"><span class="name">Field Notes</span><span class="desc">Ask the local model, with sources</span></span>
+        <span class="arrow">→</span>
+      </a>
+      <a href="#ref">
+        <span class="sym" style="background:#D3E3EE;border-color:#3E7CA8"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2C5F85" stroke-width="1.8" aria-hidden="true"><path d="M4 5h6a2 2 0 0 1 2 2v13a2 2 0 0 0-2-2H4z"/><path d="M20 5h-6a2 2 0 0 0-2 2v13a2 2 0 0 1 2-2h6z"/></svg></span>
+        <span class="txt"><span class="name">Reference</span><span class="desc">Search the offline Wikipedia pack</span></span>
+        <span class="arrow">→</span>
+      </a>
+      <div class="soon">
+        <span class="sym" style="background:#B5D6A8"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1F3E27" stroke-width="1.8" aria-hidden="true"><path d="M12 21V11"/><path d="M12 11C12 6 8 4 5 4c0 4 2 7 7 7z"/><path d="M12 13c0-4 3-6 7-6 0 4-3 6-7 6z"/></svg></span>
+        <span class="txt"><span class="name">Survey</span><span class="desc">Identify plants &amp; animals by camera</span></span>
+        <span class="tag">V2</span>
+      </div>
+      <div class="soon">
+        <span class="sym" style="background:#EADFCF;border-color:#A0714F"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7A5236" stroke-width="1.8" aria-hidden="true"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/></svg></span>
+        <span class="txt"><span class="name">Quadrangle</span><span class="desc">Offline maps &amp; directions</span></span>
+        <span class="tag">V2</span>
+      </div>
+      <div class="soon">
+        <span class="sym" style="background:#F1D9D2;border-color:#B5442E"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9A3522" stroke-width="2" aria-hidden="true"><path d="M12 6v12M6 12h12"/></svg></span>
+        <span class="txt"><span class="name">Guides</span><span class="desc">First aid &amp; survival manuals</span></span>
+        <span class="tag">V2</span>
+      </div>
+    </nav>
+
+    <footer class="foot">
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <div class="scalebar" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+        <span class="mono" style="font-size:10px;color:var(--muted)">LIVE V1 · LOCAL ONLY</span>
+      </div>
+      <button type="button" class="link-btn" data-about>About this kit</button>
+    </footer>
+  </section>
+
+  <!-- FIELD NOTES -->
+  <section class="screen" id="notes" aria-label="Field Notes">
+    <header class="band">
+      <div class="band-row">
+        <a href="#home" class="back" aria-label="Back to home"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></a>
+        <div style="flex:1;display:flex;flex-direction:column;gap:2px;min-width:0">
+          <h2>Field Notes</h2>
+          <span class="kicker" id="notesKicker">ON-DEVICE</span>
+        </div>
+        <label for="modelPick" class="sr">Model</label>
+        <select id="modelPick" class="model-pick"></select>
+      </div>
+    </header>
+    <div class="thread" id="thread" aria-live="polite">
+      <p class="empty" id="emptyNote">Ask anything. Answers come from the offline library, and every one shows its sources so you can check it.</p>
+    </div>
+    <form class="composer" id="composer">
+      <label for="noteQ" class="sr">Ask a question</label>
+      <input id="noteQ" type="text" placeholder="Ask anything — works offline" autocomplete="off">
+      <button class="send" id="sendBtn" aria-label="Send"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+    </form>
+  </section>
+
+  <!-- REFERENCE -->
+  <section class="screen" id="ref" aria-label="Reference">
+    <header class="band">
+      <div class="band-row">
+        <a href="#home" class="back" aria-label="Back to home" id="refBack"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></a>
+        <div style="flex:1;display:flex;flex-direction:column;gap:2px">
+          <h2>Reference</h2>
+          <span class="kicker" id="refKicker">LIBRARY</span>
+        </div>
+      </div>
+    </header>
+    <div id="refSearch">
+      <form class="field" id="refForm">
+        <label for="refQ">Search the library</label>
+        <div class="searchbox">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2F5D3A" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+          <input id="refQ" type="search" placeholder="Poison ivy, hypothermia, knots…" autocomplete="off">
+        </div>
+      </form>
+      <div class="results" id="results"></div>
+    </div>
+    <article class="article" id="article" hidden></article>
+  </section>
+</div>
+
+<div class="sheet-bg" id="about" role="dialog" aria-modal="true" aria-labelledby="aboutTitle">
+  <div class="sheet">
+    <div class="band"><h2 id="aboutTitle" style="font-size:20px">About this kit</h2>
+      <button type="button" class="close" aria-label="Close" data-close><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <ol>
+      <li><strong>Nothing leaves this box.</strong> The model, the library and the search all run on this machine.</li>
+      <li><strong>Field Notes is a small AI.</strong> It can be confidently wrong, so every answer shows its sources. Check them.</li>
+      <li><strong>The library is a slice of Simple English Wikipedia.</strong> If it isn't in the pack, the model shouldn't know it.</li>
+      <li><strong>In an emergency, call for help first.</strong> This kit is a backup, not a doctor.</li>
+    </ol>
+  </div>
+</div>
+
+<script>
+const $ = (s) => document.querySelector(s);
+const esc = (s) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const artHref = (t) => '#ref/' + encodeURIComponent(t);
+let busy = false;
+
+// ---- routing: #home, #notes, #ref, #ref/<title>
+function route() {
+  const [screen, arg] = (location.hash.slice(1) || 'home').split(/\/(.*)/s);
+  document.querySelectorAll('.screen').forEach((el) => el.classList.toggle('on', el.id === (screen || 'home')));
+  if (!document.querySelector('.screen.on')) $('#home').classList.add('on');
+  if (screen === 'ref') arg ? openArticle(decodeURIComponent(arg)) : showSearch();
+  if (screen === 'notes') setTimeout(() => $('#noteQ').focus(), 0);
+  window.scrollTo(0, 0);
+}
+addEventListener('hashchange', route);
+
+// ---- status
+async function loadStatus() {
+  try {
+    const s = await (await fetch('/api/status')).json();
+    const pick = $('#modelPick');
+    const saved = localStorage.getItem('fk-model');
+    pick.innerHTML = s.models.map((m) => `<option value="${m.key}">${esc(m.label)}</option>`).join('');
+    pick.value = s.models.some((m) => m.key === saved) ? saved : s.default_model;
+    updateModelLabels();
+    $('#hw').textContent = s.gpu ? s.gpu.replace(/NVIDIA GeForce /, '').toUpperCase() : 'CPU';
+    if (s.articles) {
+      $('#statusText').textContent = 'Offline — everything runs on this machine';
+      $('#statLib').textContent = `LIBRARY ${s.articles.toLocaleString()} ARTICLES`;
+      $('#refKicker').textContent = `LIBRARY · ${s.articles.toLocaleString()} ARTICLES`;
+    } else {
+      $('#statusDot').classList.add('warn');
+      $('#statusText').textContent = 'No library yet — run .\\run.ps1 -Ingest';
+      $('#statLib').textContent = 'LIBRARY EMPTY';
+    }
+  } catch {
+    $('#statusDot').classList.add('warn');
+    $('#statusText').textContent = 'Server not reachable';
+  }
+}
+function updateModelLabels() {
+  const label = $('#modelPick').selectedOptions[0]?.textContent || '';
+  $('#notesKicker').textContent = `${label.toUpperCase()} · ON-DEVICE`;
+  $('#statModel').textContent = `MODEL ${label.toUpperCase()}`;
+}
+$('#modelPick').addEventListener('change', (e) => {
+  try { localStorage.setItem('fk-model', e.target.value); } catch {}
+  updateModelLabels();
+});
+
+// ---- Field Notes
+$('#homeAsk').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const q = $('#homeQ').value.trim();
+  if (!q) return;
+  $('#homeQ').value = '';
+  location.hash = '#notes';
+  ask(q);
+});
+$('#composer').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const q = $('#noteQ').value.trim();
+  if (!q || busy) return;
+  $('#noteQ').value = '';
+  ask(q);
+});
+
+function renderAnswer(text) {
+  // [1] -> superscript links to the source article
+  return esc(text).replace(/\[(\d+)\]/g, '<sup>[$1]</sup>');
+}
+
+async function ask(q) {
+  if (busy) return;
+  busy = true;
+  $('#sendBtn').disabled = true;
+  $('#emptyNote')?.remove();
+  const thread = $('#thread');
+  const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+  thread.insertAdjacentHTML('beforeend', `<div class="q">${esc(q)}</div>`);
+  const note = document.createElement('article');
+  note.className = 'note';
+  note.innerHTML = `<div class="head"><span>FIELD NOTE · ${time}</span><span class="state">SEARCHING…</span></div>
+    <div class="scalebar busy" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+    <div class="body"></div><div class="sources"></div><div class="meta"></div>`;
+  thread.appendChild(note);
+  note.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  const body = note.querySelector('.body');
+  let text = '';
+  try {
+    const res = await fetch('/api/ask', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question: q, model: $('#modelPick').value }),
+    });
+    if (!res.ok) throw new Error(await res.text());
+    const reader = res.body.getReader();
+    const dec = new TextDecoder();
+    let buf = '';
+    for (;;) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, { stream: true });
+      let nl;
+      while ((nl = buf.indexOf('\n')) >= 0) {
+        const line = buf.slice(0, nl); buf = buf.slice(nl + 1);
+        if (!line.trim()) continue;
+        const m = JSON.parse(line);
+        if (m.sources) {
+          note.querySelector('.state').textContent = 'THINKING…';
+          note.querySelector('.sources').innerHTML = m.sources.length
+            ? '<span class="label">SOURCES</span>' + m.sources.map((s) =>
+                `<a class="chip" href="${artHref(s.title)}">${s.n} · ${esc(s.title)}</a>`).join('')
+            : '';
+        }
+        if (m.status) note.querySelector('.state').textContent = m.status.toUpperCase();
+        if (m.delta) {
+          text += m.delta;
+          body.innerHTML = renderAnswer(text);
+          note.querySelector('.state').textContent = 'WRITING…';
+        }
+        if (m.error) body.innerHTML = `<div class="warnbox">${esc(m.error)}</div>`;
+        if (m.done) note.querySelector('.meta').textContent = `${m.model.toLowerCase()} · ${m.tokens_per_sec} tok/s`;
+      }
+      note.scrollIntoView({ block: 'end' });
+    }
+  } catch (err) {
+    body.innerHTML = `<div class="warnbox">Something went wrong: ${esc(String(err.message || err))}</div>`;
+  } finally {
+    note.querySelector('.scalebar').remove();
+    note.querySelector('.state').textContent = '';
+    busy = false;
+    $('#sendBtn').disabled = false;
+  }
+}
+
+// ---- Reference
+function showSearch() {
+  $('#article').hidden = true;
+  $('#refSearch').hidden = false;
+  $('#refBack').href = '#home';
+}
+let searchTimer;
+$('#refQ').addEventListener('input', () => { clearTimeout(searchTimer); searchTimer = setTimeout(runSearch, 250); });
+$('#refForm').addEventListener('submit', (e) => { e.preventDefault(); runSearch(); });
+async function runSearch() {
+  const q = $('#refQ').value.trim();
+  if (!q) { $('#results').innerHTML = ''; return; }
+  const { results } = await (await fetch('/api/search?q=' + encodeURIComponent(q))).json();
+  $('#results').innerHTML = results.length
+    ? results.map((r) => `<a class="result" href="${artHref(r.title)}"><div class="t">${esc(r.title)}</div><div class="s">${esc(r.snippet)}</div></a>`).join('')
+    : '<p class="empty">Nothing in the pack for that.</p>';
+}
+async function openArticle(title) {
+  $('#refSearch').hidden = true;
+  const el = $('#article');
+  el.hidden = false;
+  $('#refBack').href = '#ref';
+  el.innerHTML = '<p class="empty">Opening…</p>';
+  const res = await fetch('/api/article?title=' + encodeURIComponent(title));
+  if (!res.ok) { el.innerHTML = '<p class="empty">That article is not in the offline pack.</p>'; return; }
+  const a = await res.json();
+  // Split the stitched text into readable paragraphs of a few sentences each.
+  const sentences = a.text.match(/[^.!?]+[.!?]+["')\]]*\s*|.+$/g) || [a.text];
+  const paras = [];
+  for (let i = 0; i < sentences.length; i += 4) paras.push(sentences.slice(i, i + 4).join(''));
+  el.innerHTML = `<h3>${esc(a.title)}</h3>${paras.map((p) => `<p>${esc(p.trim())}</p>`).join('')}
+    <div class="src"><span>SOURCE · WIKIPEDIA (OFFLINE) · CC BY-SA 4.0</span>
+    <a href="#notes" id="askAbout">Ask about this →</a></div>`;
+  $('#askAbout').addEventListener('click', () => setTimeout(() => ask(`Tell me about ${a.title}.`), 0));
+}
+
+// ---- About sheet
+document.querySelectorAll('[data-about]').forEach((b) => b.addEventListener('click', () => $('#about').classList.add('on')));
+$('#about').addEventListener('click', (e) => { if (e.target.id === 'about' || e.target.closest('[data-close]')) $('#about').classList.remove('on'); });
+addEventListener('keydown', (e) => { if (e.key === 'Escape') $('#about').classList.remove('on'); });
+
+route();
+loadStatus();
+</script>
+</body>
+</html>
