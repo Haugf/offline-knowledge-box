@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 222" width="640" height="222" role="img" aria-labelledby="t d">
+  <title id="t">Chat speed on an RTX 3070</title>
+  <desc id="d">Tokens per second, median of 5 questions. SmolLM2 1.7B: 45.0. SmolLM2 135M: 30.1.</desc>
+  <rect width="640" height="222" rx="6" fill="#F4F1E6"/>
+  <g font-family="'Segoe UI', system-ui, -apple-system, sans-serif">
+    <text x="24" y="36" font-size="17" font-weight="700" fill="#1E1E1E">Chat speed on an RTX 3070</text>
+    <text x="24" y="58" font-size="13" fill="#55524A">Tokens per second, median of 5 questions · higher is better</text>
+  </g>
+  <!-- recessive grid -->
+  <g stroke="#D8CBB8" stroke-width="1">
+    <line x1="170" y1="80" x2="170" y2="172"/><line x1="250" y1="80" x2="250" y2="172"/>
+    <line x1="330" y1="80" x2="330" y2="172"/><line x1="410" y1="80" x2="410" y2="172"/>
+    <line x1="490" y1="80" x2="490" y2="172"/><line x1="570" y1="80" x2="570" y2="172"/>
+  </g>
+  <g font-family="Consolas, ui-monospace, monospace" font-size="11" fill="#55524A" text-anchor="middle">
+    <text x="170" y="190">0</text><text x="250" y="190">10</text><text x="330" y="190">20</text>
+    <text x="410" y="190">30</text><text x="490" y="190">40</text><text x="570" y="190">50</text>
+  </g>
+  <text x="370" y="210" font-family="'Segoe UI', system-ui, sans-serif" font-size="12" fill="#55524A" text-anchor="middle">tokens / second</text>
+  <!-- bars: square at the baseline, 4px rounded data end -->
+  <g fill="#2E7A45">
+    <path d="M170 92 H526 Q530 92 530 96 V110 Q530 114 526 114 H170 Z"/>
+    <path d="M170 136 H406.8 Q410.8 136 410.8 140 V154 Q410.8 158 406.8 158 H170 Z"/>
+  </g>
+  <g font-family="'Segoe UI', system-ui, sans-serif" font-size="13" fill="#1E1E1E">
+    <text x="158" y="107.5" text-anchor="end" font-weight="600">SmolLM2 1.7B</text>
+    <text x="158" y="151.5" text-anchor="end" font-weight="600">SmolLM2 135M</text>
+    <text x="538" y="107.5">45.0</text>
+    <text x="418.8" y="151.5">30.1</text>
+  </g>
+</svg>
