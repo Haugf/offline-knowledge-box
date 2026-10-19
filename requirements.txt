@@ -1,0 +1,11 @@
+torch
+transformers
+accelerate
+bitsandbytes
+sentence-transformers
+datasets
+numpy
+pillow
+num2words
+fastapi
+uvicorn[standard]
