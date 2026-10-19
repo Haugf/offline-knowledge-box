@@ -43,8 +43,34 @@ Embeddings: `sentence-transformers/all-MiniLM-L6-v2`. Knowledge: `wikimedia/wiki
 - **Home**: status (library size, GPU, model), ask box, legend of tools.
 - **Field Notes**: streamed answers grounded in the library, numbered citations, source chips, tok/s.
 - **Reference**: semantic search over the pack and an offline article reader.
-- **Survey** *(work in progress)*: take a photo, a small vision model guesses what it is, then
-  looks it up in the library.
+- **Survey**: take a photo and a small vision model guesses what it is, then looks it up in the
+  library.
+
+## Survey
+
+Identify plants, animals, insects and fungi from a photo.
+
+1. **On the phone:** tap *Take a photo* (opens the rear camera) or *Choose photo*. The browser
+   shrinks the image to 1024 px before sending it, so uploads are small over Wi‑Fi.
+2. **On the PC:** [SmolVLM2 2.2B](https://huggingface.co/HuggingFaceTB/SmolVLM2-2.2B-Instruct)
+   answers in a fixed `NAME / SCIENTIFIC / FEATURES` format.
+3. **Lookup:** the guess is searched in the knowledge pack. An article whose title matches the name
+   is marked **EXACT MATCH**; the others are **RELATED**. *Ask about this* hands the guess to
+   Field Notes.
+
+On an RTX 3070 the first photo takes about 20 s while the model loads, then about 3–6 s each.
+Chat and vision models share the GPU one at a time, so switching between Survey and Field Notes
+reloads a model.
+
+**Be honest about it on stream:** a 2.2B model is often confidently wrong. In testing, a Christmas
+cactus came back as "rose". That's why every result carries the warning and links the library
+article to check against.
+
+Technical notes:
+- Needs `torchvision` (installed by `run.ps1`) and `num2words`.
+- `server.py` patches `SmolVLMModel.inputs_merger` for transformers 5.x, which groups image tokens
+  by the vision patch size (14) instead of tokens per image tile (81) and fails on every image.
+  The patch can go once transformers fixes it upstream.
 
 Planned (shown as V2 on the home screen): Quadrangle (offline maps), Guides (first-aid packs),
 on-phone mode, Spanish & Chinese UI, night mode.

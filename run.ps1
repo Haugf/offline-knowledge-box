@@ -19,6 +19,13 @@ if (-not (Test-Path $py)) {
     & $py -m pip install torch torchvision --index-url https://download.pytorch.org/whl/cu124
 }
 & $py -m pip install -q -r (Join-Path $here "requirements.txt")
+# Survey's vision model needs torchvision built for the same CUDA torch (PyPI's would swap in CPU torch).
+& $py -c "import importlib.util, sys; sys.exit(importlib.util.find_spec('torchvision') is None)"
+if ($LASTEXITCODE -ne 0) {
+    $tv = & $py -c "import torch; print({'2.6': '0.21', '2.7': '0.22', '2.8': '0.23'}.get(torch.__version__[:3], ''))"
+    $spec = if ($tv) { "torchvision==$tv.*" } else { "torchvision" }
+    & $py -m pip install -q $spec --index-url https://download.pytorch.org/whl/cu124
+}
 
 $env:DATA_DIR = Join-Path $here "data"
 $env:CHAT_MODEL = $Model
